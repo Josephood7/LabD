@@ -14,7 +14,9 @@ MEMORY {
 	dff2 : ORIGIN = 0x00000400, LENGTH = 0x00000200
 	flash : ORIGIN = 0x10000000, LENGTH = 0x01000000
 	mprj : ORIGIN = 0x30000000, LENGTH = 0x00100000
-	mprjram : ORIGIN = 0x38000000, LENGTH = 0x00400000
+	mp : ORIGIN = 0x38000000, LENGTH = 0x00000200
+	da : ORIGIN = 0x38000200, LENGTH = 0x00000600
+	/*mprjram : ORIGIN = 0x38000000, LENGTH = 0x00400000*/
 	hk : ORIGIN = 0x26000000, LENGTH = 0x00100000
 	csr : ORIGIN = 0xf0000000, LENGTH = 0x00010000
 }
@@ -30,7 +32,7 @@ SECTIONS
 		KEEP(*crt0*(.text))
 		KEEP(*(.text.isr))
 
-		*(.text .stub .text.* .gnu.linkonce.t.*)
+		/* *(.text .stub .text.* .gnu.linkonce.t.*) */
 		_etext = .;
 	} > flash
 
@@ -54,7 +56,7 @@ SECTIONS
 		*(.sdata .sdata.* .gnu.linkonce.s.*)
 		. = ALIGN(8);
 		_edata = .;
-	} > dff AT > flash
+	} > da AT > flash
 
 	.bss :
 	{
@@ -69,14 +71,15 @@ SECTIONS
 		. = ALIGN(8);
 		_ebss = .;
 		_end = .;
-	} > dff AT > flash
+	} > da AT > flash
 
 	.mprjram :
 	{
 		. = ALIGN(8);
 		_fsram = .;
+		*libgcc.a:*(.text .text.*)
 
-	} > mprjram AT > flash
+	} > mp AT > flash
 }
 
 PROVIDE(_fstack = ORIGIN(dff2) + LENGTH(dff2));
@@ -84,5 +87,5 @@ PROVIDE(_fstack = ORIGIN(dff2) + LENGTH(dff2));
 PROVIDE(_fdata_rom = LOADADDR(.data));
 PROVIDE(_edata_rom = LOADADDR(.data) + SIZEOF(.data));
 
-PROVIDE(_esram = ORIGIN(mprjram) + SIZEOF(.mprjram));
+PROVIDE(_esram = ORIGIN(mp) + SIZEOF(.mprjram));
 PROVIDE(_esram_rom = LOADADDR(.mprjram));
